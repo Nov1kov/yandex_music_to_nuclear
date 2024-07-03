@@ -45,7 +45,8 @@ def get_tracks_from_js(soup):
     if js_script:
         json_text = re.findall(r'var Mu=(.*);', js_script.text)[0]
         json_data = json.loads(json_text)
-        if 'playlist' not in json_data:
+        if 'pageData' not in json_data or 'playlist' not in json_data['pageData']:
+            print("Couldn't parse from js script.")
             return [], ''
         tracklist_title = json_data['pageData']['playlist']['title']
         for index, track_json in enumerate(json_data['pageData']['playlist']['tracks']):
