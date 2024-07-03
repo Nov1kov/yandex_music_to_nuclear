@@ -82,17 +82,26 @@ def get_tracks_from_html(soup):
     return tracks, tracklist_title
 
 
+def proceed_tracks(client, tracks_data, tracklist_title):
+    tracks_list = client.tracks(track_ids=[t['id'] for t in tracks_data])
+    tracks = [parse_track_json(index, track_json.__dict__) for index, track_json in enumerate(tracks_list)]
+    save_to_file(tracks, tracklist_title)
+
+
 def get_tracks_by_api(token):
     from yandex_music import Client
 
     client = Client(token).init()
+
+    likes_playlist = client.users_likes_tracks()
+    if likes_playlist:
+        proceed_tracks(client, likes_playlist.tracks, 'likes')
+
     all_playlists = client.users_playlists_list()
     playlists = client.users_playlists(kind=[pl['kind'] for pl in all_playlists])
+
     for playlist in playlists:
-        tracklist_title = playlist['title']
-        tracks_list = client.tracks(track_ids=[t['id'] for t in playlist['tracks']])
-        tracks = [parse_track_json(index, track_json.__dict__) for index, track_json in enumerate(tracks_list)]
-        save_to_file(tracks, tracklist_title)
+        proceed_tracks(client, playlist['tracks'], playlist['title'])
 
 
 def get_html(url):
