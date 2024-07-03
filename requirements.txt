@@ -1,0 +1,4 @@
+yandex-music
+lxml
+requests
+beautifulsoup4
