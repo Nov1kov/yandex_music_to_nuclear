@@ -1,4 +1,5 @@
 import argparse
+import csv
 import json
 import re
 from pathlib import Path
@@ -36,6 +37,18 @@ def save_to_file(tracks, tracklist_title):
     file_name = f"{tracklist_title}.json"
     print(f'Exported: {file_name} with {len(tracks)} tracks')
     json.dump(playlist_data, open(file_name, 'w', encoding='utf-8'))
+
+
+def save_to_csv(tracks, tracklist_title):
+    # https://support.soundiiz.com/hc/en-us/articles/360010006793-What-is-the-CSV-format-to-import-playlists-and-favorites
+    with open(f"{tracklist_title}.csv", "w", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["title", "artist", "album", "isrc"])
+        for track in tracks:
+            writer.writerow([track["title"], track["artist"], 
+                             track["album"] if 'album' in track else '', 
+                             track["thumbnail"] if 'thumbnail' in track else ''])
+    print(f'Exported: {tracklist_title}.csv with {len(tracks)} tracks')
 
 
 def get_tracks_from_js(soup):
@@ -83,26 +96,29 @@ def get_tracks_from_html(soup):
     return tracks, tracklist_title
 
 
-def proceed_tracks(client, tracks_data, tracklist_title):
+def proceed_tracks(client, tracks_data, tracklist_title, csv_file: bool = False):
     tracks_list = client.tracks(track_ids=[t['id'] for t in tracks_data])
     tracks = [parse_track_json(index, track_json.__dict__) for index, track_json in enumerate(tracks_list)]
-    save_to_file(tracks, tracklist_title)
+    if csv_file:
+        save_to_csv(tracks, tracklist_title)
+    else:
+        save_to_file(tracks, tracklist_title)
 
 
-def get_tracks_by_api(token):
+def get_tracks_by_api(token, csv_file: bool = False):
     from yandex_music import Client
 
     client = Client(token).init()
 
     likes_playlist = client.users_likes_tracks()
     if likes_playlist:
-        proceed_tracks(client, likes_playlist.tracks, 'likes')
+        proceed_tracks(client, likes_playlist.tracks, 'likes', csv_file)
 
     all_playlists = client.users_playlists_list()
     playlists = client.users_playlists(kind=[pl['kind'] for pl in all_playlists])
 
     for playlist in playlists:
-        proceed_tracks(client, playlist['tracks'], playlist['title'])
+        proceed_tracks(client, playlist['tracks'], playlist['title'], csv_file)
 
 
 def get_html(url):
@@ -136,11 +152,12 @@ if __name__ == "__main__":
     parser.add_argument('-u', '--urls', nargs='+', help='Ссылки на плейлисты')
     parser.add_argument("-f", "--files", nargs='+', help="Файлы с путем до html файла с плейлистом.")
     parser.add_argument("-t", "--token", help="Токен Яндекс.Музыки - для доступа к аккаунту через API")
-
+    parser.add_argument("-c", "--csv", action='store_true', help="Сохранить плейлисты в формате CSV")
+    
     args = parser.parse_args()
 
     if args.token:
-        get_tracks_by_api(args.token)
+        get_tracks_by_api(args.token, args.csv)
     elif args.urls or args.files:
         if args.urls:
             htmls = [get_html(url) for url in args.urls]

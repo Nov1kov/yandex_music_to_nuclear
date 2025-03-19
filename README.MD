@@ -1,11 +1,11 @@
-## Экспорт плейлистов [Яндекс.Музыки](https://music.yandex.ru/home) в JSON для [Nuclear Music Player](https://github.com/nukeop/nuclear)
+## Экспорт плейлистов [Яндекс.Музыки](https://music.yandex.ru/home) в JSON для [Nuclear Music Player](https://github.com/nukeop/nuclear) и [Soundiiz](https://soundiiz.com/)
 
 ### Описание
 
-Этот Python-скрипт позволяет экспортировать плейлисты Яндекс.Музыки в формат JSON, который [можно импортировать](ttps://nukeop.gitbook.io/nuclear/user-manual/importing-playlists) в [Nuclear плеер](https://nuclear.js.org/downloads). 
+Этот Python-скрипт позволяет экспортировать плейлисты Яндекс.Музыки в формат JSON, который [можно импортировать](https://nukeop.gitbook.io/nuclear/user-manual/importing-playlists) в [Nuclear плеер](https://nuclear.js.org/downloads) или в формате CSV для [Soundiiz](https://soundiiz.com/).
 
 **Результат:**
-Рядом с исходным плейлистом (или HTML-файлом) будут созданы **JSON-файлы с названием плейлиста**.
+Рядом с исходным плейлистом (или HTML-файлом) будут созданы **JSON-файлы с названием плейлиста** или **CSV-файлы**.
 
 
 * Nuclear - это бесплатный и открытый кроссплатформенный музыкальный плеер.
@@ -32,8 +32,11 @@
         1. Получите токен Яндекс.Музыки: [https://yandex-music.readthedocs.io/en/main/token.html](https://yandex-music.readthedocs.io/en/main/token.html)
         2. Запустите скрипт, указав токен и ссылку на плейлист:
            ```bash
-           python yandex_music_exporter.py -t YOUR_TOKEN
+           python yandex_music_exporter.py -t YOUR_TOKEN [-c]
            ```
+           * Используйте флаг `-c` для сохранения плейлистов в формате CSV для Soundiiz.
+    * **Примечание:** 
+        * Ошибка `451: Unavailable For Legal Reasons` API может не работать из вашей страны, попробуйте какой-то VPN.
 
 2. **С помощью ссылки на плейлист:**
     * **Преимущества:**
@@ -45,7 +48,7 @@
         1. Сделайте плейлист [публичным](https://yandex.ru/support/music-app-ios/playlists/access-smart.html).
         2. Запустите скрипт, указав ссылку на плейлист:
            ```bash
-           python main.py -u https://music.yandex.ru/user_nickname/user/playlists/1005
+           python main.py -u https://music.yandex.ru/user_nickname/user/playlists/1005 [-c]
            ```
 
 3. **Сохранение HTML-страницы плейлиста:**
@@ -57,7 +60,7 @@
          1. Сохраните html страницу с плейлистом.
          2. Запустите скрипт, указав флаг `-f` и путь до html файлов:
               ```bash
-              python main.py -f playlist1.html playlist2.html
+              python main.py -f playlist1.html playlist2.html [-c]
               ```
 
 ### Установка
